@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>Leaderboard - Placement Assessment Platform</title>
+</head>
+<body>
+
+    <div class="topbar">
+        <a class="brand" href="/dashboard/">Placement<span>Prep</span> Admin</a>
+        <nav>
+            <a href="/dashboard/">Dashboard</a>
+            <a href="{% url 'admin_quiz_list' %}">Quizzes</a>
+            <a href="{% url 'admin_category_list' %}">Categories</a>
+            <a href="{% url 'admin_analytics' %}">Analytics</a>
+            <a href="{% url 'admin_leaderboard' %}">Leaderboard</a>
+            <a href="/admin/logout/">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+
+        <h1>Leaderboard</h1>
+        <p class="subtitle">Top-performing students ranked by average score.</p>
+
+        <div class="action-bar" style="margin-bottom:20px;">
+            <a class="btn {% if not selected_category %}btn-active{% endif %}" href="{% url 'admin_leaderboard' %}">Overall</a>
+            {% for category in categories %}
+                <a class="btn btn-secondary {% if selected_category == category.id %}btn-active{% endif %}"
+                   href="?category={{ category.id }}">{{ category.name }}</a>
+            {% endfor %}
+        </div>
+
+        {% if leaderboard %}
+            <table class="data-table">
+                <tr>
+                    <th>Rank</th>
+                    <th>Student</th>
+                    <th>Email</th>
+                    <th>Attempts</th>
+                    <th>Passed</th>
+                    <th>Avg %</th>
+                    <th>Highest %</th>
+                </tr>
+                {% for entry in leaderboard %}
+                    <tr>
+                        <td>{{ entry.rank }}</td>
+                        <td>{{ entry.name }}</td>
+                        <td>{{ entry.email }}</td>
+                        <td>{{ entry.attempt_count }}</td>
+                        <td>{{ entry.passed_count }}</td>
+                        <td>{{ entry.average_percentage }}%</td>
+                        <td>{{ entry.highest_score }}%</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="empty-state">No leaderboard data yet for this view.</div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

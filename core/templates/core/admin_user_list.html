@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>Manage Students - Placement Assessment Platform</title>
+</head>
+<body>
+    <div class="topbar">
+        <a class="brand" href="/dashboard/">Placement<span>Prep</span> Admin</a>
+        <nav>
+            <a href="/dashboard/">Dashboard</a>
+            <a href="{% url 'admin_quiz_list' %}">Quizzes</a>
+            <a href="{% url 'admin_category_list' %}">Categories</a>
+            <a href="{% url 'admin_analytics' %}">Analytics</a>
+            <a href="{% url 'admin_leaderboard' %}">Leaderboard</a>
+            <a href="{% url 'admin_user_list' %}">Users</a>
+            <a href="/admin/logout/">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <h1>Manage Students</h1>
+        <p class="subtitle">View and manage student accounts.</p>
+
+        <form method="get" style="margin-bottom:20px;">
+            <input type="text" name="search" value="{{ search }}" placeholder="Search by name or email">
+            <button class="btn" type="submit">Search</button>
+        </form>
+
+        {% if students %}
+            <table class="data-table">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Action</th>
+                </tr>
+                {% for student in students %}
+                    <tr>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.email }}</td>
+                        <td>
+                            <span class="badge badge-{% if student.status %}passed{% else %}failed{% endif %}">
+                                {% if student.status %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ student.created_at }}</td>
+                        <td>
+                            <a class="btn btn-secondary" href="{% url 'admin_user_toggle_status' student.id %}">
+                                {% if student.status %}Deactivate{% else %}Activate{% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="empty-state">No students found.</div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>Attempt Details - Placement Assessment Platform</title>
+    <style>
+    .option-row { padding: 4px 0; }
+    .option-correct { color: #10b981; font-weight: 600; }
+    .option-wrong { color: #ef4444; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <a class="brand" href="/dashboard/">Placement<span>Prep</span> Admin</a>
+        <nav>
+            <a href="/dashboard/">Dashboard</a>
+            <a href="{% url 'admin_quiz_list' %}">Quizzes</a>
+            <a href="{% url 'admin_category_list' %}">Categories</a>
+            <a href="{% url 'admin_analytics' %}">Analytics</a>
+            <a href="{% url 'admin_leaderboard' %}">Leaderboard</a>
+            <a href="{% url 'admin_user_list' %}">Users</a>
+            <a href="/admin/logout/">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <h1>Attempt Details</h1>
+        <p class="subtitle">{{ attempt.user.name }} ({{ attempt.user.email }}) — {{ attempt.quiz.title }}</p>
+
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="label">Score</div>
+                <div class="value">{{ attempt.score }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Percentage</div>
+                <div class="value">{{ attempt.percentage }}%</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Status</div>
+                <div class="value"><span class="badge badge-{{ attempt.status|lower }}">{{ attempt.status }}</span></div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Correct / Incorrect / Unanswered</div>
+                <div class="value" style="font-size:1rem;">{{ attempt.correct_answers }} / {{ attempt.incorrect_answers }} / {{ attempt.unanswered }}</div>
+            </div>
+        </div>
+
+        <h2 style="margin-top:32px;">Question-by-Question Review</h2>
+
+        {% for answer in answers %}
+            <div class="chart-box" style="margin-bottom:16px; padding:16px; border:1px solid #e5e7eb; border-radius:8px;">
+                <p><strong>Q{{ forloop.counter }}: {{ answer.question.question_text }}</strong></p>
+                <ul style="list-style:none; padding-left:0;">
+                    {% for option in answer.question.options.all %}
+                        <li class="option-row{% if option.is_correct %} option-correct{% endif %}{% if answer.selected_option_id == option.id and not option.is_correct %} option-wrong{% endif %}">
+                            {{ option.option_text }}
+                            {% if option.is_correct %} (Correct Answer){% endif %}
+                            {% if answer.selected_option_id == option.id %} — Selected{% endif %}
+                        </li>
+                    {% endfor %}
+                    {% if not answer.selected_option %}
+                        <li style="color:#6b7280;">No answer selected</li>
+                    {% endif %}
+                </ul>
+            </div>
+        {% empty %}
+            <div class="empty-state">No answers recorded for this attempt.</div>
+        {% endfor %}
+    </div>
+</body>
+</html>

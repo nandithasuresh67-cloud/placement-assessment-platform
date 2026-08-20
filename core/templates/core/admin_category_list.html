@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>Manage Categories - Placement Assessment Platform</title>
+</head>
+<body>
+
+    <div class="topbar">
+        <a class="brand" href="/dashboard/">Placement<span>Prep</span> Admin</a>
+        <nav>
+            <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+            <a href="{% url 'admin_quiz_list' %}">Quizzes</a>
+            <a href="/admin/logout/">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+
+        <h1>Manage Placement Categories</h1>
+        <p class="subtitle">Organize assessments by placement area — Aptitude, Technical, Programming, SQL, and more.</p>
+
+        <div class="action-bar">
+            <a class="btn btn-secondary" href="{% url 'admin_dashboard' %}">Back to Dashboard</a>
+            <a class="btn btn-accent" href="{% url 'admin_category_create' %}">+ Create New Category</a>
+        </div>
+
+        {% if categories %}
+            <table class="data-table">
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+                {% for category in categories %}
+                    <tr>
+                        <td>{{ category.name }}</td>
+                        <td>{{ category.description }}</td>
+                        <td>
+                            <a class="link" href="{% url 'admin_category_update' category.id %}">Edit</a>
+                            &nbsp;|&nbsp;
+                            <a class="link" style="color:var(--danger);" href="{% url 'admin_category_delete' category.id %}">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="empty-state">No categories yet. Create your first one above.</div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

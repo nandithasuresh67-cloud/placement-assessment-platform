@@ -1,0 +1,126 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>My Dashboard - Placement Assessment Platform</title>
+</head>
+<body>
+
+    <div class="topbar">
+        <a class="brand" href="/student-dashboard/">Placement<span>Prep</span></a>
+                <nav>
+            <a href="{% url 'quiz_list' %}">Quizzes</a>
+            <a href="{% url 'my_attempts' %}">My History</a>
+            <a href="{% url 'student_performance' %}">Performance</a>
+            <a href="/accounts/logout/">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+
+        <h1>My Dashboard</h1>
+        <p class="subtitle">Track your progress and jump back into your placement prep.</p>
+
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="label">Total Attempts</div>
+                <div class="value">{{ total_attempts }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Passed</div>
+                <div class="value" style="color:var(--success);">{{ passed_count }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Failed</div>
+                <div class="value" style="color:var(--danger);">{{ failed_count }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Average Score</div>
+                <div class="value">{{ average_percentage }}%</div>
+            </div>
+        </div>
+
+        <div class="action-bar" style="margin-top:24px;">
+            <a class="btn" href="/quizzes/">Browse Quizzes</a>
+            <a class="btn btn-secondary" href="/history/">View Full History</a>
+        </div>
+
+        <h2>Progress by Category</h2>
+
+        {% if category_progress %}
+            <table class="data-table">
+                <tr>
+                    <th>Category</th>
+                    <th>Attempts</th>
+                    <th>Average Score</th>
+                </tr>
+                {% for cat in category_progress %}
+                    <tr>
+                        <td>{{ cat.name }}</td>
+                        <td>{{ cat.attempt_count }}</td>
+                        <td>
+                            {% if cat.average_percentage is not None %}
+                                {{ cat.average_percentage }}%
+                            {% else %}
+                                <span class="hint">Not attempted yet</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="empty-state">No categories available yet.</div>
+        {% endif %}
+
+        <h2>Recent Attempts</h2>
+
+        {% if recent_attempts %}
+            <table class="data-table">
+                <tr>
+                    <th>Quiz</th>
+                    <th>Category</th>
+                    <th>Score</th>
+                    <th>Percentage</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+                {% for attempt in recent_attempts %}
+                    <tr>
+                        <td>{{ attempt.quiz.title }}</td>
+                        <td>{{ attempt.quiz.category.name }}</td>
+                        <td>{{ attempt.score }}</td>
+                        <td>{{ attempt.percentage }}%</td>
+                        <td><span class="badge badge-{{ attempt.status|lower }}">{{ attempt.status }}</span></td>
+                        <td>{{ attempt.started_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="empty-state">You haven't attempted any quizzes yet. Get started below!</div>
+        {% endif %}
+
+        <h2>Recommended For You</h2>
+
+        {% if recommended_quizzes %}
+            {% for quiz in recommended_quizzes %}
+                <div class="card">
+                    <h3 style="margin-top:0;">{{ quiz.title }}</h3>
+                    <p>{{ quiz.description }}</p>
+                    <p>
+                        <span class="badge badge-medium">{{ quiz.category.name }}</span>
+                        <span class="badge badge-{{ quiz.difficulty|lower }}">{{ quiz.difficulty }}</span>
+                    </p>
+                    <a class="btn btn-accent" href="/quizzes/{{ quiz.id }}/">Start Now</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">You've attempted all available quizzes. Great job!</div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

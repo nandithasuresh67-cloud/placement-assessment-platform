@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>Manage Quizzes - Placement Assessment Platform</title>
+</head>
+<body>
+
+    <div class="topbar">
+        <a class="brand" href="/dashboard/">Placement<span>Prep</span> Admin</a>
+        <nav>
+            <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+            <a href="{% url 'admin_category_list' %}">Categories</a>
+            <a href="/admin/logout/">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+
+        <h1>Manage Quizzes</h1>
+        <p class="subtitle">Create, edit, and manage assessments across all placement areas.</p>
+
+        <div class="action-bar">
+            <a class="btn btn-secondary" href="{% url 'admin_dashboard' %}">Back to Dashboard</a>
+            <a class="btn btn-accent" href="{% url 'admin_quiz_create' %}">+ Create New Quiz</a>
+        </div>
+
+        {% if quizzes %}
+            <table class="data-table">
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Difficulty</th>
+                    <th>Status</th>
+                    <th>Duration (min)</th>
+                    <th>Actions</th>
+                </tr>
+                {% for quiz in quizzes %}
+                    <tr>
+                        <td>{{ quiz.title }}</td>
+                        <td>{{ quiz.category.name }}</td>
+                        <td><span class="badge badge-{{ quiz.difficulty|lower }}">{{ quiz.difficulty }}</span></td>
+                        <td><span class="badge badge-{{ quiz.status|lower }}">{{ quiz.status }}</span></td>
+                        <td>{{ quiz.duration }}</td>
+                        <td>
+                            <a class="link" href="{% url 'admin_quiz_update' quiz.id %}">Edit</a>
+                            &nbsp;|&nbsp;
+                            <a class="link" href="{% url 'admin_question_list' quiz.id %}">Questions</a>
+                            &nbsp;|&nbsp;
+                            <a class="link" style="color:var(--danger);" href="{% url 'admin_quiz_delete' quiz.id %}">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="empty-state">No quizzes yet. Create your first one above.</div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

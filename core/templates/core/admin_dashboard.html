@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>Admin Dashboard - Placement Assessment Platform</title>
+</head>
+<body>
+
+        <div class="topbar">
+        <a class="brand" href="/dashboard/">Placement<span>Prep</span> Admin</a>
+        <nav>
+            <a href="{% url 'admin_quiz_list' %}">Quizzes</a>
+            <a href="{% url 'admin_category_list' %}">Categories</a>
+            <a href="{% url 'admin_analytics' %}">Analytics</a>
+            <a href="{% url 'admin_leaderboard' %}">Leaderboard</a>
+            <a href="{% url 'admin_user_list' %}">Users</a>
+            <a href="/admin/logout/">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+
+        <h1>Admin Dashboard</h1>
+        <p class="subtitle">Overview of the placement assessment platform.</p>
+
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="label">Total Quizzes</div>
+                <div class="value">{{ total_quizzes }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Total Students</div>
+                <div class="value">{{ total_students }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Total Attempts</div>
+                <div class="value">{{ total_attempts }}</div>
+            </div>
+        </div>
+
+        <div class="action-bar" style="margin-top:24px;">
+            <a class="btn" href="{% url 'admin_quiz_list' %}">Manage Quizzes</a>
+            <a class="btn btn-secondary" href="{% url 'admin_category_list' %}">Manage Categories</a>
+        </div>
+
+        <h2>Recent Attempts</h2>
+
+        {% if recent_attempts %}
+            <table class="data-table">
+                <tr>
+                    <th>Student</th>
+                    <th>Quiz</th>
+                    <th>Score</th>
+                    <th>Percentage</th>
+                    <th>Status</th>
+                    <th>Started At</th>
+                </tr>
+                {% for attempt in recent_attempts %}
+                    <tr>
+                        <tr>
+    <td><a href="{% url 'admin_attempt_detail' attempt.id %}">{{ attempt.user.email }}</a></td>
+                        <td>{{ attempt.quiz.title }}</td>
+                        <td>{{ attempt.score }}</td>
+                        <td>{{ attempt.percentage }}%</td>
+                        <td>
+                            <span class="badge badge-{{ attempt.status|lower }}">{{ attempt.status }}</span>
+                        </td>
+                        <td>{{ attempt.started_at }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="empty-state">No attempts yet.</div>
+        {% endif %}
+
+        <h2>All Quizzes</h2>
+
+        {% if quizzes %}
+            <table class="data-table">
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Difficulty</th>
+                    <th>Status</th>
+                    <th>Duration (min)</th>
+                </tr>
+                {% for quiz in quizzes %}
+                    <tr>
+                        <td>{{ quiz.title }}</td>
+                        <td>{{ quiz.category.name }}</td>
+                        <td><span class="badge badge-{{ quiz.difficulty|lower }}">{{ quiz.difficulty }}</span></td>
+                        <td><span class="badge badge-{{ quiz.status|lower }}">{{ quiz.status }}</span></td>
+                        <td>{{ quiz.duration }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="empty-state">No quizzes yet.</div>
+        {% endif %}
+        
+    </div>
+
+</body>
+</html>

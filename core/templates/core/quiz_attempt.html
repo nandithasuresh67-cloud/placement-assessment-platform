@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>{{ quiz.title }} - Placement Assessment Platform</title>
+</head>
+<body>
+
+    <div class="topbar">
+        <a class="brand" href="/quizzes/">Placement<span>Prep</span></a>
+        <nav>
+            <a href="/admin/logout/">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+
+        <h1>{{ quiz.title }}</h1>
+        <p class="subtitle">
+            Time Limit: {{ quiz.duration }} minutes &nbsp;|&nbsp;
+            Answer all questions and submit when ready.
+        </p>
+
+        <div class="card" style="position:sticky; top:12px; z-index:10; text-align:center;">
+            <span class="label" style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">
+                Time Remaining
+            </span>
+            <div id="quiz-timer" style="font-size:1.8rem; font-weight:700; color:var(--primary-dark);">
+                --:--
+            </div>
+        </div>
+
+        <form method="post" id="quiz-form"
+              data-duration-minutes="{{ quiz.duration }}"
+              data-started-at="{{ attempt.started_at.isoformat }}">
+            <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
+            {% csrf_token %}
+
+            {% for question in quiz.questions.all %}
+                <div class="question-card">
+                    <div class="question-meta">Question {{ forloop.counter }} &nbsp;|&nbsp; {{ question.marks }} mark(s)</div>
+                    <h3 style="margin-top:0;">{{ question.question_text }}</h3>
+
+                    {% for option in question.options.all %}
+                        <label style="display:block; padding:8px 0; border-top:1px solid var(--border);">
+                            <input
+                                type="radio"
+                                name="question_{{ question.id }}"
+                                value="{{ option.id }}"
+                                style="margin-right:8px;"
+                            >
+                            {{ option.option_text }}
+                        </label>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-accent" style="font-size:1rem; padding:12px 28px;">Submit Quiz</button>
+        </form>
+
+    </div>
+
+    <script>
+        (function () {
+            var formEl = document.getElementById('quiz-form');
+            var durationMinutes = parseInt(formEl.dataset.durationMinutes, 10);
+            var startedAtIso = formEl.dataset.startedAt;
+            var startedAt = new Date(startedAtIso).getTime();
+            var totalSeconds = durationMinutes * 60;
+            var timerEl = document.getElementById('quiz-timer');
+            var submitted = false;
+
+            function formatTime(seconds) {
+                var m = Math.floor(seconds / 60);
+                var s = seconds % 60;
+                return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+            }
+
+            function tick() {
+                if (submitted) {
+                    return;
+                }
+
+                var elapsed = Math.floor((Date.now() - startedAt) / 1000);
+                var remaining = totalSeconds - elapsed;
+
+                if (remaining <= 0) {
+                    timerEl.textContent = '00:00';
+                    submitted = true;
+                    formEl.submit();
+                    return;
+                }
+
+                timerEl.textContent = formatTime(remaining);
+
+                if (remaining <= 60) {
+                    timerEl.style.color = 'var(--danger)';
+                }
+            }
+
+            tick();
+            setInterval(tick, 1000);
+        })();
+    </script>
+
+</body>
+</html>

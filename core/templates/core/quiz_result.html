@@ -1,0 +1,74 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>Quiz Result - Placement Assessment Platform</title>
+</head>
+<body>
+
+    <div class="topbar">
+        <a class="brand" href="/quizzes/">Placement<span>Prep</span></a>
+        <nav>
+            <a href="/student-dashboard/">Dashboard</a>
+            <a href="/history/">My History</a>
+            <a href="/admin/logout/">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+
+        <h1>Quiz Result</h1>
+        <p class="subtitle">{{ quiz.title }}</p>
+
+        <div class="result-summary">
+
+            {% if attempt.status == 'PASSED' %}
+                <span class="result-status" style="background:var(--success-bg); color:var(--success);">
+                    Passed
+                </span>
+            {% else %}
+                <span class="result-status" style="background:var(--danger-bg); color:var(--danger);">
+                    Failed
+                </span>
+            {% endif %}
+
+            <div class="result-grid">
+                <div class="item">
+                    <div class="label">Score</div>
+                    <div class="value">{{ attempt.score }}</div>
+                </div>
+                <div class="item">
+                    <div class="label">Percentage</div>
+                    <div class="value">{{ attempt.percentage }}%</div>
+                </div>
+                <div class="item">
+                    <div class="label">Correct</div>
+                    <div class="value" style="color:var(--success);">{{ attempt.correct_answers }}</div>
+                </div>
+                <div class="item">
+                    <div class="label">Incorrect</div>
+                    <div class="value" style="color:var(--danger);">{{ attempt.incorrect_answers }}</div>
+                </div>
+                <div class="item">
+                    <div class="label">Unanswered</div>
+                    <div class="value">{{ attempt.unanswered }}</div>
+                </div>
+                <div class="item">
+                    <div class="label">Time Taken</div>
+                    <div class="value">{{ attempt.time_taken }}s</div>
+                </div>
+            </div>
+
+            <div class="action-bar" style="margin-top:10px;">
+                <a class="btn" href="/quizzes/">Back to Quizzes</a>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

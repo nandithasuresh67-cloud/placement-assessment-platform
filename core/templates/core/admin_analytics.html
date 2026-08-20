@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <title>Analytics - Placement Assessment Platform</title>
+</head>
+<body>
+
+    <div class="topbar">
+        <a class="brand" href="/dashboard/">Placement<span>Prep</span> Admin</a>
+        <nav>
+            <a href="/dashboard/">Dashboard</a>
+            <a href="{% url 'admin_quiz_list' %}">Quizzes</a>
+            <a href="{% url 'admin_category_list' %}">Categories</a>
+            <a href="/admin/logout/">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+
+        <h1>Analytics</h1>
+        <p class="subtitle">Performance overview of the placement assessment platform.</p>
+
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="label">Total Quizzes</div>
+                <div class="value">{{ total_quizzes }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Total Students</div>
+                <div class="value">{{ total_students }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Total Attempts</div>
+                <div class="value">{{ total_attempts }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Pass Rate</div>
+                <div class="value">{{ pass_rate }}%</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Average Score</div>
+                <div class="value">{{ average_score }}%</div>
+            </div>
+        </div>
+
+        <div class="charts-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:24px; margin-top:32px;">
+            <div class="chart-box" style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:16px;">
+                <h3>Attempt Trends (Last 30 Days)</h3>
+                <canvas id="trendChart"></canvas>
+            </div>
+            <div class="chart-box" style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:16px;">
+                <h3>Category Performance (Avg %)</h3>
+                <canvas id="categoryChart"></canvas>
+            </div>
+            <div class="chart-box" style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:16px;">
+                <h3>Pass vs Fail</h3>
+                <canvas id="passFailChart"></canvas>
+            </div>
+            <div class="chart-box" style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:16px;">
+                <h3>Student Registrations (Last 30 Days)</h3>
+                <canvas id="registrationChart"></canvas>
+            </div>
+        </div>
+
+        <h2 style="margin-top:32px;">Quiz Performance</h2>
+        {% if quiz_performance %}
+            <table class="data-table">
+                <tr>
+                    <th>Quiz</th>
+                    <th>Category</th>
+                    <th>Attempts</th>
+                    <th>Avg %</th>
+                    <th>Pass Rate</th>
+                </tr>
+                {% for quiz in quiz_performance %}
+                    <tr>
+                        <td>{{ quiz.title }}</td>
+                        <td>{{ quiz.category }}</td>
+                        <td>{{ quiz.attempt_count }}</td>
+                        <td>{{ quiz.average_percentage }}%</td>
+                        <td>{{ quiz.pass_rate }}%</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="empty-state">No quiz data yet.</div>
+        {% endif %}
+
+        <h2>Student Rankings</h2>
+        {% if student_rankings %}
+            <table class="data-table">
+                <tr>
+                    <th>Rank</th>
+                    <th>Student</th>
+                    <th>Attempts</th>
+                    <th>Avg %</th>
+                </tr>
+                {% for student in student_rankings %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ student.username }}</td>
+                        <td>{{ student.attempt_count }}</td>
+                        <td>{{ student.average_percentage }}%</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="empty-state">No ranked students yet.</div>
+        {% endif %}
+
+    </div>
+
+    {{ trend_labels|json_script:"trend-labels" }}
+    {{ trend_data|json_script:"trend-data" }}
+    {{ category_performance|json_script:"category-data" }}
+    {{ registration_labels|json_script:"registration-labels" }}
+    {{ registration_data|json_script:"registration-data" }}
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const trendLabels = JSON.parse(document.getElementById('trend-labels').textContent);
+        const trendData = JSON.parse(document.getElementById('trend-data').textContent);
+        const categoryData = JSON.parse(document.getElementById('category-data').textContent);
+        const registrationLabels = JSON.parse(document.getElementById('registration-labels').textContent);
+        const registrationData = JSON.parse(document.getElementById('registration-data').textContent);
+
+        new Chart(document.getElementById('trendChart'), {
+            type: 'line',
+            data: {
+                labels: trendLabels,
+                datasets: [{
+                    label: 'Attempts',
+                    data: trendData,
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79,70,229,0.1)',
+                    fill: true,
+                    tension: 0.3,
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'bar',
+            data: {
+                labels: categoryData.map(c => c.name),
+                datasets: [{
+                    label: 'Avg %',
+                    data: categoryData.map(c => c.average_percentage),
+                    backgroundColor: '#10b981',
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+
+        new Chart(document.getElementById('passFailChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Passed', 'Failed'],
+                datasets: [{
+                    data: [{{ pass_rate }}, {{ fail_rate }}],
+                    backgroundColor: ['#10b981', '#ef4444'],
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: true } } }
+        });
+
+        new Chart(document.getElementById('registrationChart'), {
+            type: 'line',
+            data: {
+                labels: registrationLabels,
+                datasets: [{
+                    label: 'New Students',
+                    data: registrationData,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245,158,11,0.1)',
+                    fill: true,
+                    tension: 0.3,
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+    });
+    </script>
+
+</body>
+</html>

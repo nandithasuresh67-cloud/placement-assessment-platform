@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>Questions - {{ quiz.title }}</title>
+</head>
+<body>
+
+    <div class="topbar">
+        <a class="brand" href="/dashboard/">Placement<span>Prep</span> Admin</a>
+        <nav>
+            <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+            <a href="{% url 'admin_quiz_list' %}">Quizzes</a>
+            <a href="/admin/logout/">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+
+        <h1>Questions for "{{ quiz.title }}"</h1>
+        <p class="subtitle"><a class="link" href="{% url 'admin_quiz_list' %}">&larr; Back to Quiz List</a></p>
+
+        <div class="action-bar">
+            <a class="btn btn-accent" href="{% url 'admin_question_create' quiz.id %}">+ Add New Question</a>
+        </div>
+
+        {% if questions %}
+
+            {% for question in questions %}
+                <div class="question-card">
+                    <div class="question-meta">Question {{ forloop.counter }}</div>
+                    <h3 style="margin-top:0;">{{ question.question_text }}</h3>
+
+                    <p class="hint">
+                        Marks: {{ question.marks }} &nbsp;|&nbsp;
+                        <span class="badge badge-{{ question.difficulty|lower }}">{{ question.difficulty }}</span>
+                    </p>
+
+                    <ul class="option-list">
+                        {% for option in question.options.all %}
+                            <li>
+                                {{ option.option_text }}
+                                {% if option.is_correct %}
+                                    <span class="badge badge-correct">Correct</span>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="action-bar" style="margin-top:14px; margin-bottom:0;">
+                        <a class="link" href="{% url 'admin_question_update' quiz.id question.id %}">Edit</a>
+                        <a class="link" style="color:var(--danger);" href="{% url 'admin_question_delete' quiz.id question.id %}">Delete</a>
+                    </div>
+                </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="empty-state">No questions yet for this quiz. Add your first one above.</div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

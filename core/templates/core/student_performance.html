@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <title>My Performance - Placement Assessment Platform</title>
+</head>
+<body>
+       <div class="topbar">
+        <a class="brand" href="/student-dashboard/">Placement<span>Prep</span></a>
+        <nav>
+            <a href="{% url 'quiz_list' %}">Quizzes</a>
+            <a href="{% url 'my_attempts' %}">My History</a>
+            <a href="{% url 'student_performance' %}">Performance</a>
+            <a href="/accounts/logout/">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <h1>My Performance</h1>
+        <p class="subtitle">Your progress across categories and over time.</p>
+
+        <div class="chart-box" style="border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom:24px;">
+            <h3>Score Trend</h3>
+            <canvas id="trendChart"></canvas>
+        </div>
+
+        <h2>Category Performance</h2>
+        {% if category_performance %}
+            <table class="data-table">
+                <tr>
+                    <th>Category</th>
+                    <th>Attempts</th>
+                    <th>Passed</th>
+                    <th>Avg %</th>
+                    <th>Best %</th>
+                </tr>
+                {% for cat in category_performance %}
+                    <tr>
+                        <td>{{ cat.name }}</td>
+                        <td>{{ cat.attempt_count }}</td>
+                        <td>{{ cat.passed_count }}</td>
+                        <td>{% if cat.average_percentage != None %}{{ cat.average_percentage }}%{% else %}—{% endif %}</td>
+                        <td>{% if cat.best_percentage != None %}{{ cat.best_percentage }}%{% else %}—{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="empty-state">No category data yet.</div>
+        {% endif %}
+    </div>
+
+    {{ trend_labels|json_script:"trend-labels" }}
+    {{ trend_data|json_script:"trend-data" }}
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const labels = JSON.parse(document.getElementById('trend-labels').textContent);
+        const data = JSON.parse(document.getElementById('trend-data').textContent);
+
+        new Chart(document.getElementById('trendChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Score %',
+                    data: data,
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79,70,229,0.1)',
+                    fill: true,
+                    tension: 0.3,
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+    });
+    </script>
+</body>
+</html>

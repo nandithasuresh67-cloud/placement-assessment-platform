@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>Confirm - Placement Assessment Platform</title>
+</head>
+<body>
+    <div class="topbar">
+        <a class="brand" href="/dashboard/">Placement<span>Prep</span> Admin</a>
+    </div>
+    <div class="container">
+        <h1>{% if student.status %}Deactivate{% else %}Activate{% endif %} Account</h1>
+        <p>Are you sure you want to {% if student.status %}deactivate{% else %}activate{% endif %} <strong>{{ student.name }}</strong> ({{ student.email }})?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button class="btn" type="submit">Confirm</button>
+            <a class="btn btn-secondary" href="{% url 'admin_user_list' %}">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

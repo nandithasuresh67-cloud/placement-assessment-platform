@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>My Attempts - Placement Assessment Platform</title>
+</head>
+<body>
+
+    <div class="topbar">
+        <a class="brand" href="/quizzes/">Placement<span>Prep</span></a>
+        <nav>
+            <a href="/quizzes/">Quizzes</a>
+            <a href="/student-dashboard/">Dashboard</a>
+            <a href="/history/">My History</a>
+            <a href="/admin/logout/">Logout</a>
+        </nav>
+    </div>
+
+    <div class="container">
+
+        <h1>My Attempt History</h1>
+        <p class="subtitle">Review your past assessment attempts and track your progress.</p>
+
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="label">Total Attempts</div>
+                <div class="value">{{ total_attempts }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Passed</div>
+                <div class="value" style="color:var(--success);">{{ passed_count }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Failed</div>
+                <div class="value" style="color:var(--danger);">{{ failed_count }}</div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:24px;">
+            <form method="get" style="display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end;">
+
+                <div style="flex:1; min-width:180px;">
+                    <label>Filter by Quiz</label>
+                    <select name="quiz">
+                        <option value="">All Quizzes</option>
+                        {% for quiz in quizzes_attempted %}
+                            <option value="{{ quiz.id }}" {% if selected_quiz == quiz.id|stringformat:"s" %}selected{% endif %}>
+                                {{ quiz.title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="flex:1; min-width:180px;">
+                    <label>Filter by Status</label>
+                    <select name="status">
+                        <option value="">All</option>
+                        <option value="PASSED" {% if selected_status == "PASSED" %}selected{% endif %}>Passed</option>
+                        <option value="FAILED" {% if selected_status == "FAILED" %}selected{% endif %}>Failed</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn" style="height:41px;">Apply Filters</button>
+                <a href="/history/" class="btn btn-secondary" style="height:41px; display:flex; align-items:center;">Clear</a>
+
+            </form>
+        </div>
+
+        <h2>Attempts</h2>
+
+        {% if attempts %}
+            <table class="data-table">
+                <tr>
+                    <th>Quiz</th>
+                    <th>Category</th>
+                    <th>Score</th>
+                    <th>Percentage</th>
+                    <th>Status</th>
+                    <th>Time Taken</th>
+                    <th>Date</th>
+                </tr>
+                {% for attempt in attempts %}
+                    <tr>
+                        <td>{{ attempt.quiz.title }}</td>
+                        <td>{{ attempt.quiz.category.name }}</td>
+                        <td>{{ attempt.score }}</td>
+                        <td>{{ attempt.percentage }}%</td>
+                        <td><span class="badge badge-{{ attempt.status|lower }}">{{ attempt.status }}</span></td>
+                        <td>{{ attempt.time_taken }}s</td>
+                        <td>{{ attempt.started_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="empty-state">No attempts found for the selected filters.</div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>
